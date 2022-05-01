@@ -13,11 +13,11 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.Random;
-//test the git functions
+
 public class SnakeAPP extends Application {
     //Important variables
     //Area of the canvas
-    private static final int WIDTH = 20;
+    private static final int WIDTH = 10;
     private static final int HEIGHT = 20;
     //For each grid, their size should be defined
     private static final int GRID_SIZE = 40;
