@@ -158,7 +158,7 @@ public class SnakeAPP extends Application {
         gc.setFill(Color.AQUAMARINE);
         gc.setFont(new Font(20));
         gc.fillText("Current score:   "+ (speed-3)+" points", 40, 40);
-        //作者
+        //Authors
         gc.setFill(Color.AQUA);
         gc.setFont(new Font(15));
         gc.fillText("The first iteration    Authors：Stevens students ", 20, 740);
@@ -166,7 +166,7 @@ public class SnakeAPP extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //游戏的初始化
+        //Initilize the game
         newGame();
         Pane pane = new Pane();
         Canvas canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
