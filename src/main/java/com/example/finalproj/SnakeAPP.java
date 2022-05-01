@@ -13,7 +13,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.Random;
-
+//test the git functions
 public class SnakeAPP extends Application {
     //Important variables
     //Area of the canvas
