@@ -177,6 +177,8 @@ public class SnakeAPP extends Application {
         settingStage.setTitle("Settings");
         settingStage.show();
 
+
+
         //Initilize the game
         newGame();
         Pane pane = new Pane();
