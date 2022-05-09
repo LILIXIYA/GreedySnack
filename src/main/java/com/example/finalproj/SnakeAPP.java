@@ -3,11 +3,14 @@ package com.example.finalproj;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -172,12 +175,11 @@ public class SnakeAPP extends Application {
         Stage settingStage = new Stage();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("stageSetting.fxml"));
         Parent parent = loader.load();
+
         Scene sceneSetting = new Scene(parent);
         settingStage.setScene(sceneSetting);
         settingStage.setTitle("Settings");
         settingStage.show();
-
-
 
         //Initilize the game
         newGame();
