@@ -13,6 +13,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.Random;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 
 public class SnakeAPP extends Application {
     //Important variables
@@ -166,9 +168,19 @@ public class SnakeAPP extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        //Initilize the settings
+        Stage settingStage = new Stage();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("stageSetting.fxml"));
+        Parent parent = loader.load();
+        Scene sceneSetting = new Scene(parent);
+        settingStage.setScene(sceneSetting);
+        settingStage.setTitle("Settings");
+        settingStage.show();
+
         //Initilize the game
         newGame();
         Pane pane = new Pane();
+
         Canvas canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         pane.getChildren().add(canvas);
 
