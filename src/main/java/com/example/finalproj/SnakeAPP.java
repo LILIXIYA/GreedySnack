@@ -14,10 +14,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.io.File;
 import java.util.Arrays;
 import java.util.Random;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+
+import javax.sound.sampled.*;
 
 public class SnakeAPP extends Application {
     //Important variables
@@ -37,6 +41,7 @@ public class SnakeAPP extends Application {
     //Maximum of length of snack
     private static Point[] snake = new Point[1000];
     //Current length
+    static boolean flag = true;
     private static int snakeLength = 0;
 
     //Orientation
@@ -168,7 +173,35 @@ public class SnakeAPP extends Application {
         gc.setFont(new Font(15));
         gc.fillText("The first iteration    Authors：Stevens students ", 20, 740);
     }
-
+    static void playMusic() {
+        try {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(new File("game.wav"));
+            AudioFormat aif = ais.getFormat();
+            final SourceDataLine sdl;
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, aif);
+            sdl = (SourceDataLine) AudioSystem.getLine(info);
+            sdl.open(aif);
+            sdl.start();
+            FloatControl fc = (FloatControl) sdl.getControl(FloatControl.Type.MASTER_GAIN);
+            double value = 2;
+            float dB = (float) (Math.log(value == 0.0 ? 0.0001 : value) / Math.log(10.0) * 20.0);
+            fc.setValue(dB);
+            int nByte = 0;
+            final int SIZE = 1024 * 64;
+            byte[] buffer = new byte[SIZE];
+            while (nByte != -1) {
+                if(flag) {
+                    nByte = ais.read(buffer, 0, SIZE);
+                    sdl.write(buffer, 0, nByte);
+                }else {
+                    nByte = ais.read(buffer, 0, 0);
+                }
+            }
+            sdl.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void start(Stage primaryStage) throws Exception {
         //Initilize the settings
@@ -183,6 +216,8 @@ public class SnakeAPP extends Application {
 
         //Initilize the game
         newGame();
+        new Thread(()->{while(true) {playMusic();}
+        }).start();
         Pane pane = new Pane();
 
         Canvas canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -197,6 +232,7 @@ public class SnakeAPP extends Application {
             @Override
             public void handle(long now) {
                 if (gameOver) {
+                    flag=false;
                     return;
                 }
                 if (lastTiick == 0 || now - lastTiick > 1e9 / speed) {
