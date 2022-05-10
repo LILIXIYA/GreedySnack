@@ -1,23 +1,26 @@
-package com.example.finalproj;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.Random;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.SourceDataLine;
+
+import java.io.File;
 
 public class SnakeAPP extends Application {
     //Important variables
@@ -34,11 +37,11 @@ public class SnakeAPP extends Application {
     private static int speed;
     //Food targets
     private static Point food = new Point(-1, -1);
-    //Maximum of length of snack
+    //Maximum of length of snake
     private static Point[] snake = new Point[1000];
     //Current length
     private static int snakeLength = 0;
-
+    static boolean flag = true;
     //Orientation
     enum Direction {
         UP, LEFT, DOWN, RIGHT
@@ -52,8 +55,8 @@ public class SnakeAPP extends Application {
 
     //Initialize the game
     private static void newGame() {
-        speed = 3;
-        //In the begining, the length of snack is 3
+    	speed = 3;
+        //In the beginning, the length of snake is 3
         Arrays.fill(snake, null);
         snakeLength = 0;
         snake[snakeLength++] = new Point(WIDTH / 2, HEIGHT / 2);
@@ -69,7 +72,7 @@ public class SnakeAPP extends Application {
     //Generate the food target randomly
     private static void newFood() {
         //1.The food should be within the canvas
-        //2.The food should not within the snack body
+        //2.The food should not within the snake body
         int x, y;
         do {
             x = random.nextInt(WIDTH);
@@ -81,7 +84,7 @@ public class SnakeAPP extends Application {
     }
 
     private static boolean isCollision(int x, int y) {
-        //Loop over the snack
+        //Loop over the snake
         for (int i = 0; i < snakeLength; i++) {
             Point point = snake[i];
             if (point.x == x && point.y == y) {
@@ -93,7 +96,7 @@ public class SnakeAPP extends Application {
 
     //Movement in every frames
     private static void frame() {
-        //Move the snack nody
+        //Move the snake body
         for (int i = snakeLength - 1; i >= 1; i--) {
             //Change to previous location
             snake[i].x = snake[i - 1].x;
@@ -129,7 +132,7 @@ public class SnakeAPP extends Application {
             }
         }
         //Judge if touch the food target
-        // If touchs the snack...
+        // If touch the snake...
         // 1.increase the length by 1    2.re-generate the food    3. increase the speed
         if (head.x == food.x && head.y == food.y) {
             snake[snakeLength++] = new Point(-1, -1);
@@ -143,7 +146,7 @@ public class SnakeAPP extends Application {
         //1.Draw the canvas
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        //2.Draw the snack
+        //2.Draw the snake
         for (int i = 0; i < snakeLength; i++) {
             Point point = snake[i];
             gc.setFill(Color.GREEN);
@@ -168,28 +171,49 @@ public class SnakeAPP extends Application {
         gc.setFont(new Font(15));
         gc.fillText("The first iteration    Authors：Stevens students ", 20, 740);
     }
+    
+    //background music 
+    static void playMusic() {
+		try {
+			AudioInputStream ais = AudioSystem.getAudioInputStream(new File("C:\\Users\\Teresa Huang\\eclipse-workspace\\Group Project\\game.wav"));
+			AudioFormat aif = ais.getFormat();
+			final SourceDataLine sdl;
+			DataLine.Info info = new DataLine.Info(SourceDataLine.class, aif);
+			sdl = (SourceDataLine) AudioSystem.getLine(info);
+			sdl.open(aif);
+			sdl.start();
+			FloatControl fc = (FloatControl) sdl.getControl(FloatControl.Type.MASTER_GAIN);
+			double value = 2;
+			float dB = (float) (Math.log(value == 0.0 ? 0.0001 : value) / Math.log(10.0) * 20.0);
+			fc.setValue(dB);
+			int nByte = 0;
+			final int SIZE = 1024 * 64;
+			byte[] buffer = new byte[SIZE];
+			while (nByte != -1) {
+				if(flag) {
+					nByte = ais.read(buffer, 0, SIZE);
+					sdl.write(buffer, 0, nByte);
+				}else {
+					nByte = ais.read(buffer, 0, 0);
+				}
+			}
+			sdl.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //Initilize the settings
-        Stage settingStage = new Stage();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("stageSetting.fxml"));
-        Parent parent = loader.load();
-
-        Scene sceneSetting = new Scene(parent);
-        settingStage.setScene(sceneSetting);
-        settingStage.setTitle("Settings");
-        settingStage.show();
-
-        //Initilize the game
-        newGame();
+        //Initialize the game
+    	newGame();
+    	new Thread(()->{while(true) {playMusic();}
+		}).start();
         Pane pane = new Pane();
-
         Canvas canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         pane.getChildren().add(canvas);
-
         Scene scene = new Scene(pane);
-
+        
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         AnimationTimer timer = new AnimationTimer() {
             long lastTiick;
@@ -197,6 +221,8 @@ public class SnakeAPP extends Application {
             @Override
             public void handle(long now) {
                 if (gameOver) {
+                	flag=false;
+                    
                     return;
                 }
                 if (lastTiick == 0 || now - lastTiick > 1e9 / speed) {
@@ -237,7 +263,8 @@ public class SnakeAPP extends Application {
                         break;
                     case R:
                         if (gameOver) {
-                            newGame();
+                        	 newGame();
+                        	 flag=true;
                         }
                         break;
                 }
@@ -249,8 +276,11 @@ public class SnakeAPP extends Application {
         primaryStage.sizeToScene();
         primaryStage.show();
     }
-
+    
+ 
     public static void main(String[] args) {
-        launch(args);
+    	
+    	launch(args);
+    	
     }
 }
